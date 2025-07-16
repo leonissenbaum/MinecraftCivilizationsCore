@@ -1,0 +1,4 @@
+name: MinecraftCivilizationsCore
+version: '0.0.0.1'
+main: minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore
+api-version: '1.21'
