@@ -2,10 +2,11 @@ package minecraftcivilizations.com.minecraftCivilizationsCore.API;
 
 import java.util.function.Consumer;
 
-public interface ConfigAPI {
+interface ConfigAPI {
     public void save();
     public void save(String comment);
     public void load();
+    public boolean isEmpty();
     public void reload();
     public String getString(String key);
     public void setString(String key, String value);

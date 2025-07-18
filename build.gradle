@@ -1,10 +1,32 @@
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
+    id 'maven-publish'
 }
 
-group = 'minecraftcivilizations.com'
-version = '0.0.0.1'
+group = 'com.minecraftcivilizations'
+version = '0.0.2'
+
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Emergent-Civilization/MinecraftCivilizationsCore")
+            credentials {
+                username = project.findProperty("gpr.user")
+                password = project.findProperty("gpr.key")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from components.java
+            artifactId = 'minecraftcivilizationscore'
+        }
+    }
+}
+
 
 repositories {
     mavenCentral()
@@ -16,12 +38,21 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/Emergent-Civilization/MinecraftCivilizationsCore")
+        credentials {
+            username = System.getenv("GIT_USERNAME")
+            password = System.getenv("GIT_SECRET")
+        }
+    }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.6-R0.1-SNAPSHOT")
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
+    implementation("com.minecraftcivilizations:minecraftcivilizationscore:0.0.0.1")
 
     testCompileOnly("org.projectlombok:lombok:1.18.38")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.38")

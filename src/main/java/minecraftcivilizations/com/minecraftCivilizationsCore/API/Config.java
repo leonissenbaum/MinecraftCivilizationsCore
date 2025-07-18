@@ -35,6 +35,11 @@ public class Config implements ConfigAPI {
     }
 
     private void initialize() {
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdirs();
+            logger.info("Created plugin data folder: " + plugin.getDataFolder().getPath());
+        }
+
         File f = new File(CONFIG_FILE);
         if (!f.exists()) {
             try {
@@ -47,10 +52,10 @@ public class Config implements ConfigAPI {
 
     public Config(Plugin plugin, String fileName, Logger logger) {
         this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
+        initialize();
         this.plugin = plugin;
         this.logger = logger;
         this.properties = new Properties();
-        initialize();
     }
 
     @Override
@@ -81,6 +86,11 @@ public class Config implements ConfigAPI {
     }
 
     @Override
+    public boolean isEmpty() {
+        return this.properties.isEmpty();
+    }
+
+    @Override
     public void reload() {
 
     }
@@ -93,17 +103,17 @@ public class Config implements ConfigAPI {
 
     @Override
     public void setString(String key, String value) {
-
+        properties.setProperty(key, value);
     }
 
     @Override
     public Integer getInteger(String key) {
-        return 0;
+        return Integer.parseInt(properties.getProperty(key, defaultDoubleValue.toString()));
     }
 
     @Override
     public void setInteger(String key, Integer value) {
-
+        properties.setProperty(key, value.toString());
     }
 
     @Override

@@ -1,4 +1,6 @@
 name: MinecraftCivilizationsCore
-version: '0.0.0.1'
+version: '0.0.2'
+authors:
+  - DNFneca
 main: minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore
 api-version: '1.21'
