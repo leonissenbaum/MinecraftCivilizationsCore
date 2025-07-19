@@ -1,12 +1,13 @@
 package minecraftcivilizations.com.minecraftCivilizationsCore.API;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +17,10 @@ public class Config implements ConfigAPI {
     private final Properties properties;
     private final Plugin plugin;
     private final Logger logger;
+    private boolean isEdited = false;
+    private String comment = null;
+    @Getter
+    private final ArrayList<Field<?>> fields = new ArrayList<>(0);
     @Setter
     @Getter
     private Double defaultDoubleValue = 0D;
@@ -25,9 +30,40 @@ public class Config implements ConfigAPI {
     @Setter
     @Getter
     private Boolean defaultBooleanValue = false;
+    @Setter
+    @Getter
+    private String defaultStringValue = "off";
+
+    public Config(Plugin plugin, String fileName, String comment) {
+        this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
+        this.comment = comment;
+        this.plugin = plugin;
+        this.logger = plugin.getLogger();
+        this.properties = new Properties();
+        initialize();
+    }
 
     public Config(Plugin plugin, String fileName) {
         this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
+        this.plugin = plugin;
+        this.logger = plugin.getLogger();
+        this.properties = new Properties();
+        initialize();
+    }
+
+    public Config(Plugin plugin, String fileName, String comment, Field<?>... fields) {
+        this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
+        this.comment = comment;
+        this.fields.addAll(List.of(fields));
+        this.plugin = plugin;
+        this.logger = plugin.getLogger();
+        this.properties = new Properties();
+        initialize();
+    }
+
+    public Config(Plugin plugin, String fileName, Field<?>... fields) {
+        this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
+        this.fields.addAll(List.of(fields));
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.properties = new Properties();
@@ -50,39 +86,76 @@ public class Config implements ConfigAPI {
         load();
     }
 
-    public Config(Plugin plugin, String fileName, Logger logger) {
-        this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
-        initialize();
-        this.plugin = plugin;
-        this.logger = logger;
-        this.properties = new Properties();
-    }
-
     @Override
     public void save() {
         try (OutputStream output = new FileOutputStream(CONFIG_FILE)) {
-            properties.store(output, "Application Configuration");
+            if (!isEdited) return;
+            if (comment == null) {
+                properties.store(output, "Application Configuration");
+                isEdited = false;
+                return;
+            }
+            properties.store(output, comment);
+            isEdited = false;
         } catch (IOException e) {
-            logger.warning("Could not save config file " + CONFIG_FILE + '\n' + e.getMessage());
+            logger.severe("Could not save config file " + CONFIG_FILE + '\n' + e.getMessage());
         }
     }
 
-    @Override
-    public void save(String comment) {
-        try (OutputStream output = new FileOutputStream(CONFIG_FILE)) {
-            properties.store(output, comment);
-        } catch (IOException e) {
-            logger.warning("Could not save config file " + CONFIG_FILE + '\n' + e.getMessage());
-        }
-    }
 
     @Override
     public void load() {
         try (InputStream input = new FileInputStream(CONFIG_FILE)) {
             properties.load(input);
+
+
+            for (Field<?> field : fields) {
+                if (!properties.containsKey(field.getName())) {
+                    addFieldToConfig(field, Optional.empty());
+                }
+            }
+            logger.info("isEdited " + isEdited);
+
+            if (isEdited) {
+                save();
+                logger.info("SAVEEEE");
+            }
         } catch (IOException e) {
-            System.out.println("Config file not found, using defaults");
+            logger.warning("Config file not found, using defaults");
         }
+    }
+
+    private void addFieldToConfig(Field<?> field, Optional<?> value) {
+        if (value.isEmpty()) {
+            if (field.getValueType().equals(String.class)) {
+                setString(field.getName(), defaultStringValue);
+                isEdited = true;
+            } else if (field.getValueType().equals(Integer.class)) {
+                setInteger(field.getName(), defaultIntValue);
+                isEdited = true;
+            } else if (field.getValueType().equals(Double.class)) {
+                setDouble(field.getName(), defaultDoubleValue);
+                isEdited = true;
+            } else if (field.getValueType().equals(Boolean.class)) {
+                setBoolean(field.getName(), defaultBooleanValue);
+                isEdited = true;
+            }
+        } else {
+            if (field.getValueType().equals(String.class) && value.get() instanceof String) {
+                setString(field.getName(), (String) value.get());
+                isEdited = true;
+            } else if (field.getValueType().equals(Integer.class) && value.get() instanceof Integer) {
+                setInteger(field.getName(), (Integer) value.get());
+                isEdited = true;
+            } else if (field.getValueType().equals(Double.class) && value.get() instanceof Double) {
+                setDouble(field.getName(), ((Double) value.get()));
+                isEdited = true;
+            } else if (field.getValueType().equals(Boolean.class) && value.get() instanceof Boolean) {
+                setBoolean(field.getName(), (Boolean) value.get());
+                isEdited = true;
+            }
+        }
+        logger.info("IS EDITED: " + isEdited);
     }
 
     @Override
@@ -91,19 +164,27 @@ public class Config implements ConfigAPI {
     }
 
     @Override
-    public void reload() {
+    public boolean doesFieldExist(String key) {
+        return this.properties.containsKey(key);
+    }
 
+    @Override
+    public void reload() {
+        properties.clear();
+        load();
+        logger.info("Loaded config files for: " + CONFIG_FILE);
     }
 
     @Override
     public String getString(String key) {
-        return properties.getProperty(key);
+        return properties.getProperty(key, defaultStringValue);
     }
 
 
     @Override
     public void setString(String key, String value) {
         properties.setProperty(key, value);
+        isEdited = true;
     }
 
     @Override
@@ -114,6 +195,7 @@ public class Config implements ConfigAPI {
     @Override
     public void setInteger(String key, Integer value) {
         properties.setProperty(key, value.toString());
+        isEdited = true;
     }
 
     @Override
@@ -124,6 +206,7 @@ public class Config implements ConfigAPI {
     @Override
     public void setDouble(String key, Double value) {
         properties.setProperty(key, value.toString());
+        isEdited = true;
     }
 
 
@@ -136,5 +219,6 @@ public class Config implements ConfigAPI {
     @Override
     public void setBoolean(String key, Boolean value) {
         properties.setProperty(key, value.toString());
+        isEdited = true;
     }
 }
