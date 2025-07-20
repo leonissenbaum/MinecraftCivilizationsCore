@@ -15,5 +15,4 @@ import java.util.Optional;
 public class Field<T extends Constable> {
     private String name;
     private Class<T> valueType;
-    private Optional<Class<T>> value;
 }

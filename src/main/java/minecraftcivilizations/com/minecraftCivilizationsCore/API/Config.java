@@ -51,19 +51,19 @@ public class Config implements ConfigAPI {
         initialize();
     }
 
-    public Config(Plugin plugin, String fileName, String comment, Field<?>... fields) {
+    public Config(Plugin plugin, String fileName, String comment, Consumer<ArrayList<Field<?>>> consumer) {
         this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
         this.comment = comment;
-        this.fields.addAll(List.of(fields));
+        consumer.accept(this.fields);
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.properties = new Properties();
         initialize();
     }
 
-    public Config(Plugin plugin, String fileName, Field<?>... fields) {
+    public Config(Plugin plugin, String fileName, Consumer<ArrayList<Field<?>>> consumer) {
         this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
-        this.fields.addAll(List.of(fields));
+        consumer.accept(this.fields);
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.properties = new Properties();

@@ -23,14 +23,13 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
 
         dbConfig = new Config(this,
                 "db",
-                "Database Configuration, if not understood please contact the developer. MCCore uses PostgresQL!",
-                new Field[]{
-                        new Field<>("HOST", String.class),
-                        new Field<>("PORT", Integer.class),
-                        new Field<>("DATABASE", String.class),
-                        new Field<>("USERNAME", String.class),
-                        new Field<>("PASSWORD", String.class)
-                }
+                "Database Configuration, if not understood please contact the developer. MCCore uses PostgresQL!", fields -> {
+            fields.add(new Field<>("HOST", String.class));
+            fields.add(new Field<>("PORT", String.class));
+            fields.add(new Field<>("DATABASE", String.class));
+            fields.add(new Field<>("USERNAME", String.class));
+            fields.add(new Field<>("PASSWORD", String.class));
+        }
         );
 
         String jdbcUrl = "jdbc:postgresql://" +
