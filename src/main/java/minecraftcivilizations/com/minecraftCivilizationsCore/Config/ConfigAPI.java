@@ -1,6 +1,4 @@
-package minecraftcivilizations.com.minecraftCivilizationsCore.API;
-
-import java.util.function.Consumer;
+package minecraftcivilizations.com.minecraftCivilizationsCore.Config;
 
 interface ConfigAPI {
     public void save();

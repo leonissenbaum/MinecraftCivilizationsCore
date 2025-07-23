@@ -5,15 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.lang.constant.Constable;
-import java.util.Optional;
-
-@Setter
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Field<T extends Constable> {
-    private String name;
-    private Class<T> valueType;
-    private T defaultValue;
+@Setter
+@Getter
+public class Settings {
+    private String defaultStringValue;
+    private boolean defaultBooleanValue;
+    private int defaultIntegerValue;
+    private double defaultDoubleValue;
 }

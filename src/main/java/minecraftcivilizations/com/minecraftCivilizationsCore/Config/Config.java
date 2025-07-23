@@ -1,15 +1,12 @@
-package minecraftcivilizations.com.minecraftCivilizationsCore.API;
+package minecraftcivilizations.com.minecraftCivilizationsCore.Config;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
+import minecraftcivilizations.com.minecraftCivilizationsCore.API.Field;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Config implements ConfigAPI {
@@ -21,18 +18,6 @@ public class Config implements ConfigAPI {
     private String comment = null;
     @Getter
     private final ArrayList<Field<?>> fields = new ArrayList<>(0);
-    @Setter
-    @Getter
-    private Double defaultDoubleValue = 0D;
-    @Setter
-    @Getter
-    private Integer defaultIntValue = 0;
-    @Setter
-    @Getter
-    private Boolean defaultBooleanValue = false;
-    @Setter
-    @Getter
-    private String defaultStringValue = "off";
 
     public Config(Plugin plugin, String fileName, String comment) {
         this.CONFIG_FILE = plugin.getDataFolder() + "/" + fileName + ".properties";
@@ -80,7 +65,6 @@ public class Config implements ConfigAPI {
         if (!f.exists()) {
             try {
                 f.createNewFile();
-                MinecraftCivilizationsCore.logger.log(Level.INFO, "Created config files for: " + plugin.getName());
             } catch (IOException e) {}
         }
         load();
@@ -114,11 +98,8 @@ public class Config implements ConfigAPI {
                     addFieldToConfig(field, Optional.empty());
                 }
             }
-            logger.info("isEdited " + isEdited);
-
             if (isEdited) {
                 save();
-                logger.info("SAVEEEE");
             }
         } catch (IOException e) {
             logger.warning("Config file not found, using defaults");
@@ -128,16 +109,16 @@ public class Config implements ConfigAPI {
     private void addFieldToConfig(Field<?> field, Optional<?> value) {
         if (value.isEmpty()) {
             if (field.getValueType().equals(String.class)) {
-                setString(field.getName(), defaultStringValue);
+                setString(field.getName(), (String) field.getDefaultValue());
                 isEdited = true;
             } else if (field.getValueType().equals(Integer.class)) {
-                setInteger(field.getName(), defaultIntValue);
+                setInteger(field.getName(), (Integer) field.getDefaultValue());
                 isEdited = true;
             } else if (field.getValueType().equals(Double.class)) {
-                setDouble(field.getName(), defaultDoubleValue);
+                setDouble(field.getName(), (Double) field.getDefaultValue());
                 isEdited = true;
             } else if (field.getValueType().equals(Boolean.class)) {
-                setBoolean(field.getName(), defaultBooleanValue);
+                setBoolean(field.getName(), (Boolean) field.getDefaultValue());
                 isEdited = true;
             }
         } else {
@@ -177,7 +158,7 @@ public class Config implements ConfigAPI {
 
     @Override
     public String getString(String key) {
-        return properties.getProperty(key, defaultStringValue);
+        return properties.getProperty(key);
     }
 
 
@@ -189,7 +170,7 @@ public class Config implements ConfigAPI {
 
     @Override
     public Integer getInteger(String key) {
-        return Integer.parseInt(properties.getProperty(key, defaultDoubleValue.toString()));
+        return Integer.parseInt(properties.getProperty(key));
     }
 
     @Override
@@ -200,7 +181,7 @@ public class Config implements ConfigAPI {
 
     @Override
     public Double getDouble(String key) {
-        return Double.parseDouble(properties.getProperty(key, defaultDoubleValue.toString()));
+        return Double.parseDouble(properties.getProperty(key));
     }
 
     @Override
@@ -212,7 +193,7 @@ public class Config implements ConfigAPI {
 
     @Override
     public Boolean getBoolean(String key) {
-        return Boolean.parseBoolean(properties.getProperty(key, defaultBooleanValue.toString()));
+        return Boolean.parseBoolean(properties.getProperty(key));
     }
 
 
