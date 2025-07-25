@@ -1,7 +1,7 @@
 package minecraftcivilizations.com.minecraftCivilizationsCore.Config;
 
 import lombok.Getter;
-import minecraftcivilizations.com.minecraftCivilizationsCore.API.Field;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Options.Field;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;

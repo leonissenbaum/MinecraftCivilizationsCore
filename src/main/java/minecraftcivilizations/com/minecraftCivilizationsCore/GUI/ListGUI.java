@@ -1,20 +1,11 @@
 package minecraftcivilizations.com.minecraftCivilizationsCore.GUI;
 
-import lombok.Getter;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Options.GUIPlaceOption;
-import minecraftcivilizations.com.minecraftCivilizationsCore.Options.Option;
-import minecraftcivilizations.com.minecraftCivilizationsCore.item.ItemUtils;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Item.ItemUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Statistic;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +14,6 @@ import java.util.Map;
 public class ListGUI extends GUI {
     List<ItemStack> show = new ArrayList<>();
 
-
-    /**
-     *
-     * Doesn't work if you have an inventory size less then 27
-     *
-     * @param title
-     * @param items
-     */
     public ListGUI(Component title, ArrayList<ItemStack> items) {
         super(title, 54, Map.of(GUIPlaceOption.SHOULD_PLACE_EXIT, true, GUIPlaceOption.SHOULD_PLACE_SEARCH, true));
         show.addAll(items);

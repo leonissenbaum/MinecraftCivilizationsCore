@@ -1,4 +1,4 @@
-package minecraftcivilizations.com.minecraftCivilizationsCore.API;
+package minecraftcivilizations.com.minecraftCivilizationsCore.Options;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

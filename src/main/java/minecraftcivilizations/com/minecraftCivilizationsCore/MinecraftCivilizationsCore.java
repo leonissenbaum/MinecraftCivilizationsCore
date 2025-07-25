@@ -2,13 +2,23 @@ package minecraftcivilizations.com.minecraftCivilizationsCore;
 
 import lombok.Getter;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Config.Config;
-import minecraftcivilizations.com.minecraftCivilizationsCore.API.Field;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Inventory.InventoryListener;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Item.CustomItem;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Item.CustomItemRegistry;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Options.Field;
 import minecraftcivilizations.com.minecraftCivilizationsCore.GUI.GUIManager;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Player.CustomPlayer;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Player.CustomPlayerManager;
 import minecraftcivilizations.com.minecraftCivilizationsCore.ProtocolLib.PacketManager;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Recipe.RecipeListener;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -21,10 +31,43 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
     private GUIManager guiManager;
     private CustomPlayerManager<CustomPlayer> customPlayerManager;
 
+    // TODO: DataManager???
+
     @Override
     public void onEnable() {
         // Plugin startup logic
         logger = getLogger();
+
+
+
+
+        ItemStack itemStack = CustomItem.newCustomItem(Material.PAPER,
+
+                Component.text("Bandage"),
+                new ArrayList<>() {
+                    {
+                        add(Component.empty());
+                        add(Component.text("If used by a healer able to heal players"));
+                    }
+                },
+                this);
+
+        ShapelessRecipe shapelessRecipe = new ShapelessRecipe(new NamespacedKey(this, "bandage"), itemStack);
+        shapelessRecipe.addIngredient(new ItemStack(Material.PAPER, 8));
+        shapelessRecipe.addIngredient(new ItemStack(Material.SUGAR_CANE));
+
+        Bukkit.addRecipe(shapelessRecipe, true);
+
+        CustomItem customItem = new CustomItem(
+                itemStack,
+                shapelessRecipe
+        );
+
+
+
+
+        CustomItemRegistry.register("bandage", customItem);
+
 
         guiManager = new GUIManager();
         getServer().getPluginManager().registerEvents(guiManager, this);
@@ -32,7 +75,11 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
         customPlayerManager = new CustomPlayerManager<>();
         getServer().getPluginManager().registerEvents(customPlayerManager, this);
 
+        getServer().getPluginManager().registerEvents(new InventoryListener(), this);
+        getServer().getPluginManager().registerEvents(new RecipeListener(), this);
+
         PacketManager.init();
+
 
 
         dbConfig = new Config(this,

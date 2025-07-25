@@ -1,13 +1,10 @@
-package minecraftcivilizations.com.minecraftCivilizationsCore.item;
+package minecraftcivilizations.com.minecraftCivilizationsCore.Item;
 
 import minecraftcivilizations.com.minecraftCivilizationsCore.GUI.GUIItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

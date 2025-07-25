@@ -1,4 +1,4 @@
-package minecraftcivilizations.com.minecraftCivilizationsCore.API;
+package minecraftcivilizations.com.minecraftCivilizationsCore.Options;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.lang.constant.Constable;
-import java.util.Optional;
 
 @Setter
 @Getter
