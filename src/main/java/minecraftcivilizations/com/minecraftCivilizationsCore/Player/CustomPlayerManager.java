@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;
 import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,11 +21,12 @@ import java.util.function.Consumer;
 
 public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
     private final List<T> customPlayers = new ArrayList<>();
+    @Getter
     @Setter
-    private Consumer<PlayerJoinEvent> onPlayerJoin = event -> {
-        T customPlayer = load(event.getPlayer().getUniqueId(), new TypeToken<T>() {}.getType());
+    private Consumer<Player> onPlayerJoin = player -> {
+        T customPlayer = load(player.getUniqueId(), new TypeToken<T>() {}.getType());
         if (customPlayer == null) return;
-        addCustomPlayer((T) new CustomPlayer(event.getPlayer().getUniqueId()));
+        addCustomPlayer((T) new CustomPlayer(player.getUniqueId()));
     };
     @Setter
     private Consumer<PlayerQuitEvent> onPlayerQuit = event -> {removeCustomPlayer(event.getPlayer().getUniqueId());};
@@ -93,7 +95,7 @@ public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        onPlayerJoin.accept(event);
+        onPlayerJoin.accept(event.getPlayer());
     }
 
     @EventHandler

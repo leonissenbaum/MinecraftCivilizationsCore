@@ -31,7 +31,6 @@ public class SearchSignGUI {
         // Create the packet
 
         player.sendBlockChange(blockPosition.toLocation(player.getWorld()), Material.OAK_SIGN.createBlockData());
-        MinecraftCivilizationsCore.logger.info(String.valueOf(player.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getType()));
 
         PacketContainer openSign = protocolManager.createPacket(PacketType.Play.Server.OPEN_SIGN_EDITOR);
         PacketContainer signData = protocolManager.createPacket(PacketType.Play.Server.TILE_ENTITY_DATA);
