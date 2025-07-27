@@ -37,6 +37,7 @@ public class CustomItem {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(name);
         meta.addItemFlags(ItemFlag.values());
+        item.setItemMeta(meta);
         addLore(item, lore, plugin);
         return item;
     }
