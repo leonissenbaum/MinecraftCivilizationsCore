@@ -1,10 +1,12 @@
 package minecraftcivilizations.com.minecraftCivilizationsCore;
 
+import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
-import minecraftcivilizations.com.minecraftCivilizationsCore.Config.Config;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Commands.ReloadConfigExecutor;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Config.ConfigFile;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Inventory.InventoryListener;
-import minecraftcivilizations.com.minecraftCivilizationsCore.Options.Field;
 import minecraftcivilizations.com.minecraftCivilizationsCore.GUI.GUIManager;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Options.Pair;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Player.CustomPlayer;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Player.CustomPlayerManager;
 import minecraftcivilizations.com.minecraftCivilizationsCore.ProtocolLib.PacketManager;
@@ -16,7 +18,7 @@ import java.util.logging.Logger;
 @Getter
 public final class MinecraftCivilizationsCore extends JavaPlugin {
     public static Logger logger;
-    private Config dbConfig;
+    private ConfigFile dbConfigFile;
     private GUIManager guiManager;
     private CustomPlayerManager<CustomPlayer> customPlayerManager;
 
@@ -26,6 +28,8 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         logger = getLogger();
+
+        setupCommands();
 
         guiManager = new GUIManager();
         getServer().getPluginManager().registerEvents(guiManager, this);
@@ -40,25 +44,25 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
 
 
 
-        dbConfig = new Config(this,
+        dbConfigFile = new ConfigFile(this,
                 "db",
                 "Database Configuration, if not understood please contact the developer. MCCore uses PostgresQL!", fields -> {
-            fields.add(new Field<>("HOST", String.class, "localhost"));
-            fields.add(new Field<>("PORT", Integer.class, 5432));
-            fields.add(new Field<>("DATABASE", String.class, "postgres"));
-            fields.add(new Field<>("USERNAME", String.class, "postgres"));
-            fields.add(new Field<>("PASSWORD", String.class, "pass"));
+            fields.add(new Pair<>("HOST", "localhost"));
+            fields.add(new Pair<>("PORT", 5432));
+            fields.add(new Pair<>("DATABASE", "postgres"));
+            fields.add(new Pair<>("USERNAME", "postgres"));
+            fields.add(new Pair<>("PASSWORD", "pass"));
         }
         );
 
 //        String jdbcUrl = "jdbc:postgresql://" +
-//                (dbConfig.getString("HOST").equals("off") ? "localhost" : dbConfig.getString("HOST")) +
+//                (dbConfigFile.getString("HOST").equals("off") ? "localhost" : dbConfigFile.getString("HOST")) +
 //                ":" +
-//                (dbConfig.getInteger("PORT") == 0 ? 5432 : dbConfig.getInteger("PORT")) +
+//                (dbConfigFile.getInteger("PORT") == 0 ? 5432 : dbConfigFile.getInteger("PORT")) +
 //                "/" +
-//                (dbConfig.getString("DATABASE").equals("off") ? "postgres" : dbConfig.getString("DATABASE"));
-//        String username = dbConfig.getString("USERNAME");
-//        String password = dbConfig.getString("PASSWORD");
+//                (dbConfigFile.getString("DATABASE").equals("off") ? "postgres" : dbConfigFile.getString("DATABASE"));
+//        String username = dbConfigFile.getString("USERNAME");
+//        String password = dbConfigFile.getString("PASSWORD");
 //        Connection connection = null;
 //
 //        try {
@@ -99,4 +103,8 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
         return getPlugin(MinecraftCivilizationsCore.class);
     }
 
+    private void setupCommands(){
+        PaperCommandManager commandManager = new PaperCommandManager(this);
+        commandManager.registerCommand(new ReloadConfigExecutor());
+    }
 }

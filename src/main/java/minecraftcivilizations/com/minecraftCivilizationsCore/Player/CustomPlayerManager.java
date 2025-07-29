@@ -30,10 +30,8 @@ public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
         if (customPlayer == null) return;
         addCustomPlayer((T) new CustomPlayer(player.getUniqueId()));
     };
-
     @Getter
     @Setter
-    @Deprecated(since = "forever, needs implementation", forRemoval = false)
     private Consumer<AsyncPlayerPreLoginEvent> onPrePlayerJoin = player -> {
         T customPlayer = load(player.getUniqueId());
         if (customPlayer == null) return;
@@ -116,5 +114,10 @@ public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         onPlayerQuit.accept(event);
+    }
+
+    @EventHandler
+    public void onPreJoin(AsyncPlayerPreLoginEvent event) {
+        onPrePlayerJoin.accept(event);
     }
 }
