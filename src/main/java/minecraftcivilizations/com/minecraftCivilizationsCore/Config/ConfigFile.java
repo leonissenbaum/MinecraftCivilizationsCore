@@ -106,7 +106,15 @@ public class ConfigFile {
      * @param type Type of the secondValue of T
      * @return Value of type T
      */
-    public <K, T> T get(K key, Type type) {
+    public <K, T> T get(K key, Class<T> type) {
+        return new Gson().fromJson(this.properties.getProperty(new Gson().toJson(key, key.getClass())), type);
+    }
+
+    public <K, T> T get(K key, TypeToken<T> type) {
+        return new Gson().fromJson(this.properties.getProperty(new Gson().toJson(key, key.getClass())), type.getType());
+    }
+
+    public <K, T extends Type> T get(K key, T type) {
         return new Gson().fromJson(this.properties.getProperty(new Gson().toJson(key, key.getClass())), type);
     }
 
