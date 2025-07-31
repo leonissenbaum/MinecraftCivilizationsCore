@@ -9,6 +9,7 @@ import minecraftcivilizations.com.minecraftCivilizationsCore.GUI.GUIManager;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Options.Pair;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Player.CustomPlayer;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Player.CustomPlayerManager;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Player.PlayerClickListener;
 import minecraftcivilizations.com.minecraftCivilizationsCore.ProtocolLib.PacketManager;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Recipe.RecipeListener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -39,6 +40,7 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new RecipeListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerClickListener(), this);
 
         PacketManager.init();
 
