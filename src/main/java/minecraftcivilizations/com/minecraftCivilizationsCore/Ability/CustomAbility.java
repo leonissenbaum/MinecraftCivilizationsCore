@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
+import org.bukkit.NamespacedKey;
 
 import java.util.function.Consumer;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class CustomAbility {
     private String name;
@@ -17,5 +18,4 @@ public class CustomAbility {
     private int cooldown;
     private Consumer<?> abilityFunction;
     private AbilityCastEvent castEvent;
-
 }

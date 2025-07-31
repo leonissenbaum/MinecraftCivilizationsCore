@@ -1,30 +1,24 @@
 package minecraftcivilizations.com.minecraftCivilizationsCore.Ability;
 
+import lombok.Getter;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Options.Pair;
 import net.kyori.adventure.key.Namespaced;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class CustomItemAbilityRegistry {
-    private static final Map<String, CustomAbility> abilities = new HashMap<>();
+    @Getter
+    private static final Map<NamespacedKey, CustomAbility> abilities = new HashMap<>(0);
 
-    public static void register(String id, CustomAbility ability) {
-        abilities.put(id, ability);
+    public static void register(@NotNull NamespacedKey namespacedKey, @NotNull CustomAbility ability) {
+        abilities.put(namespacedKey, ability);
     }
 
-    public static void register(Plugin plugin, CustomAbility ability) {
-        abilities.put(plugin.getName().toLowerCase(), ability);
-    }
-
-    public static CustomAbility get(String id) {
-        return abilities.get(id);
-    }
-
-    public static CustomAbility get(Plugin plugin) {
-        return abilities.get(plugin.getName().toLowerCase());
+    public static CustomAbility getAbility(@NotNull NamespacedKey namespacedKey) {
+        return abilities.get(namespacedKey);
     }
 }
