@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 
 import java.util.function.Consumer;
 
@@ -16,6 +17,6 @@ public class CustomAbility {
     private String name;
     private String description;
     private int cooldown;
-    private Consumer<?> abilityFunction;
+    private Consumer<Player> abilityFunction;
     private AbilityCastEvent castEvent;
 }

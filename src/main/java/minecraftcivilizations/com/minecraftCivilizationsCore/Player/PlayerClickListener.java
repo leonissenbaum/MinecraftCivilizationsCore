@@ -1,5 +1,9 @@
 package minecraftcivilizations.com.minecraftCivilizationsCore.Player;
 
+import minecraftcivilizations.com.minecraftCivilizationsCore.Ability.AbilityCastEvent;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Ability.CustomAbility;
+import minecraftcivilizations.com.minecraftCivilizationsCore.Item.CustomItem;
+import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -10,10 +14,17 @@ public class PlayerClickListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         Action action = event.getAction();
 
-        if (action == Action.LEFT_CLICK_AIR) {
-            event.getPlayer().sendMessage("You left-clicked in the air!");
-        } else if (action == Action.RIGHT_CLICK_AIR) {
-            event.getPlayer().sendMessage("You right-clicked in the air!");
+        CustomItem from = CustomItem.from(event.getPlayer().getInventory().getItemInMainHand());
+        for (CustomAbility ability : from.getAbilities()) {
+            if (action.isLeftClick() && ability.getCastEvent() == AbilityCastEvent.LEFT_CLICK) {
+                ability.getAbilityFunction().accept(event.getPlayer());
+            } else if (action.isLeftClick() && event.getPlayer().isSneaking() && ability.getCastEvent() == AbilityCastEvent.SNEAK_LEFT_CLICK) {
+                ability.getAbilityFunction().accept(event.getPlayer());
+            } else if (action.isRightClick() && ability.getCastEvent() == AbilityCastEvent.RIGHT_CLICK) {
+                ability.getAbilityFunction().accept(event.getPlayer());
+            } else if (action.isRightClick() && event.getPlayer().isSneaking() && ability.getCastEvent() == AbilityCastEvent.SNEAK_RIGHT_CLICK) {
+                ability.getAbilityFunction().accept(event.getPlayer());
+            }
         }
     }
 }
