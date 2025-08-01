@@ -13,6 +13,7 @@ import minecraftcivilizations.com.minecraftCivilizationsCore.Ability.CustomItemA
 import minecraftcivilizations.com.minecraftCivilizationsCore.Component.ComponentUtils;
 import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
@@ -23,10 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 @NoArgsConstructor
@@ -38,9 +36,9 @@ public class CustomItem {
     private final Set<CustomAbility> abilities = new HashSet<>(0);
 
     public CustomItem(@NotNull Material material, @NotNull Component name, @NotNull Component... lore) {
-        ItemStack item = new ItemStack(material);
+        item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(name);
+        meta.displayName(name.decoration(TextDecoration.ITALIC, false));
         meta.addItemFlags(ItemFlag.values());
         item.setItemMeta(meta);
         addLore(List.of(lore));
