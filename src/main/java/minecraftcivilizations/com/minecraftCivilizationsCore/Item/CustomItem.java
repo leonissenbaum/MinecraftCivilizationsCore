@@ -35,13 +35,12 @@ public class CustomItem {
     @Getter
     private final Set<CustomAbility> abilities = new HashSet<>(0);
 
-    public CustomItem(@NotNull Material material, @NotNull Component name, @NotNull Component... lore) {
+    public CustomItem(@NotNull Material material, @NotNull Component name) {
         item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(name.decoration(TextDecoration.ITALIC, false));
         meta.addItemFlags(ItemFlag.values());
         item.setItemMeta(meta);
-        addLore(List.of(lore));
     }
 
 //    public CustomItem(@NotNull NamespacedKey itemNamespacedKey, @NotNull NamespacedKey abilityNamespacedKey) {
@@ -81,17 +80,34 @@ public class CustomItem {
         return customItem;
     }
 
-    public void addLore(List<Component> lore) {
+    public void setLore(Plugin plugin, List<Component> lore) {
+        if (!isCustomItem(item)) {
+            initializeEditingOfPersistentDataContainer();
+        }
+        item.editPersistentDataContainer(persistentDataContainer -> {
+            Set<String> loreList = new HashSet<>(lore.size());
+            for (Component component : lore) {
+                loreList.add(ComponentUtils.serializeComponent(component));
+            }
+            persistentDataContainer.set(
+                    new NamespacedKey(plugin.getName().toLowerCase(), "lore"),
+                    PersistentDataType.STRING,
+                    new Gson().toJson(loreList, new TypeToken<List<String>>() {}.getType()));
+        });
+        reloadItem();
+    }
+
+    public void addLore(Plugin plugin, List<Component> lore) {
         if (!isCustomItem(item)) {
             initializeEditingOfPersistentDataContainer();
         }
 
         item.editPersistentDataContainer(persistentDataContainer -> {
-            List<String> loreList = new ArrayList<>(lore.size());
+            Set<String> loreList = new HashSet<>(lore.size());
             for (Component component : lore) {
                 loreList.add(ComponentUtils.serializeComponent(component));
             }
-            List<Component> lore1 = getLore();
+            List<Component> lore1 = getLoreFrom(plugin);
             if (lore1 != null) {
                 for (Component component : lore1) {
                     loreList.add(ComponentUtils.serializeComponent(component));
@@ -99,7 +115,7 @@ public class CustomItem {
             }
 
             persistentDataContainer.set(
-                    new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(), "lore"),
+                    new NamespacedKey(plugin.getName().toLowerCase(), "lore"),
                     PersistentDataType.STRING,
                     new Gson().toJson(loreList, new TypeToken<List<String>>() {}.getType()));
         });
@@ -137,10 +153,28 @@ public class CustomItem {
     public List<Component> getLore() {
         if (!isCustomItem(item)) return null;
         PersistentDataContainerView persistentDataContainerView = item.getPersistentDataContainer();
-        String value = persistentDataContainerView.get(new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(), "lore"), PersistentDataType.STRING);
-        List<String> loreList = new Gson().fromJson(value, new TypeToken<List<String>>() {}.getType());
-        if (loreList == null) return null;
         List<Component> lore = new ArrayList<>(0);
+
+        for (NamespacedKey key : persistentDataContainerView.getKeys()) {
+            if (key.getKey().equals("lore")) {
+                String value = persistentDataContainerView.get(key, PersistentDataType.STRING);
+                List<String> loreList = new Gson().fromJson(value, new TypeToken<List<String>>() {}.getType());
+                if (loreList == null) return null;
+                for (String s : loreList) {
+                    lore.add(ComponentUtils.deserializeComponent(s));
+                }
+            }
+        }
+        return lore;
+    }
+
+    public List<Component> getLoreFrom(Plugin plugin) {
+        if (!isCustomItem(item)) return null;
+        PersistentDataContainerView persistentDataContainerView = item.getPersistentDataContainer();
+        List<Component> lore = new ArrayList<>(0);
+        String lore1 = persistentDataContainerView.get(new NamespacedKey(plugin.getName().toLowerCase(), "lore"), PersistentDataType.STRING);
+        List<String> loreList = new Gson().fromJson(lore1, new TypeToken<List<String>>() {}.getType());
+        if (loreList == null) return null;
         for (String s : loreList) {
             lore.add(ComponentUtils.deserializeComponent(s));
         }
