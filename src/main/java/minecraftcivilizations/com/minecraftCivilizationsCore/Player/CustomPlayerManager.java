@@ -56,12 +56,7 @@ public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
 
     public void saveAll() {
         for (T player : customPlayers) {
-            try (FileWriter writer = new FileWriter(MinecraftCivilizationsCore.getInstance().getDataFolder() + "/" + player.getUuid().toString() + ".json")) {
-                String json = gson.toJson(player, customPlayerClass);
-                writer.write(json);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            save(player.getUuid());
         }
     }
 
