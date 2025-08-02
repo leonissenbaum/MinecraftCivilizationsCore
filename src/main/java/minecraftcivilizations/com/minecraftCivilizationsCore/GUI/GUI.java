@@ -119,7 +119,7 @@ public abstract class GUI {
             search.setOnClick(new Runnable() {
                 @Override
                 public void run() {
-                    MinecraftCivilizationsCore.getInstance().getCustomPlayerManager().getCustomPlayer(((Player) inventory.getViewers().getFirst()).getUniqueId()).setCurrentGUI(GUI.this.id);
+                    MinecraftCivilizationsCore.getInstance().getCustomPlayerManager().getCustomPlayer((inventory.getViewers().getFirst()).getUniqueId()).setCurrentGUI(GUI.this.id);
                     SearchSignGUI.openSearch((Player) inventory.getViewers().getFirst());
                 }
             });
