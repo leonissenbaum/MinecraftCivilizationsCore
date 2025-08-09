@@ -19,11 +19,19 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static minecraftcivilizations.com.minecraftCivilizationsCore.ProtocolLib.PacketManager.protocolManager;
 
 public class SearchSignGUI {
+    // Track players who have opened custom search signs
+    private static final Set<UUID> playersWithActiveSearchSign = new HashSet<>();
+
     public static void openSearch(Player player) {
+        // Mark this player as having an active search sign
+        playersWithActiveSearchSign.add(player.getUniqueId());
 
         // Define a dummy block position (does not exist in the world)
         BlockPosition blockPosition = new BlockPosition((int) player.getLocation().getX(), (int) player.getLocation().getY() - 2, (int) player.getLocation().getZ());
@@ -101,5 +109,19 @@ public class SearchSignGUI {
             }
         }
         return materials;
+    }
+
+    /**
+     * Check if a player has an active search sign
+     */
+    public static boolean hasActiveSearchSign(UUID playerUUID) {
+        return playersWithActiveSearchSign.contains(playerUUID);
+    }
+
+    /**
+     * Remove a player from the active search sign tracking
+     */
+    public static void clearActiveSearchSign(UUID playerUUID) {
+        playersWithActiveSearchSign.remove(playerUUID);
     }
 }

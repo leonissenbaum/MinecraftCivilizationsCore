@@ -70,6 +70,14 @@ public class PacketManager {
             @Override
             public void onPacketReceiving(PacketEvent packetEvent) {
                 Player player = packetEvent.getPlayer();
+                
+                // Only process if this player has an active search sign
+                if (!SearchSignGUI.hasActiveSearchSign(player.getUniqueId())) {
+                    return; // Ignore regular sign updates
+                }
+                
+                // Clear the active search sign flag since we're processing it
+                SearchSignGUI.clearActiveSearchSign(player.getUniqueId());
 
                 BlockPosition blockPosition = new BlockPosition((int) player.getLocation().getX(), (int) player.getLocation().getY() - 2, (int) player.getLocation().getZ());
                 player.sendBlockChange(blockPosition.toLocation(player.getWorld()), player.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getBlockData());
@@ -90,5 +98,3 @@ public class PacketManager {
         });
     }
 }
-
-
