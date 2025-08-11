@@ -32,7 +32,6 @@ public class CustomPlayer {
         this.uuid = uuid;
     }
 
-
     public Component getName() {
         return GsonComponentSerializer.gson().deserialize(name);
     }
@@ -40,4 +39,5 @@ public class CustomPlayer {
     public void setName(Component name) {
         this.name = GsonComponentSerializer.gson().serialize(name);
     }
+
 }

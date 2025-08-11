@@ -75,7 +75,6 @@ public class CustomItem {
             customItem.initializeEditingOfPersistentDataContainer();
             return customItem;
         }
-        MinecraftCivilizationsCore.logger.info("Reloading custom item");
         customItem.reloadItem();
         return customItem;
     }
