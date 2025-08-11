@@ -21,7 +21,7 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
     public static Logger logger;
     private ConfigFile dbConfigFile;
     private GUIManager guiManager;
-    private CustomPlayerManager<CustomPlayer> customPlayerManager;
+    private CustomPlayerManager customPlayerManager;
 
     // TODO: DataManager???
 
@@ -35,7 +35,7 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
         guiManager = new GUIManager();
         getServer().getPluginManager().registerEvents(guiManager, this);
 
-        customPlayerManager = new CustomPlayerManager<>();
+        customPlayerManager = new CustomPlayerManager();
         getServer().getPluginManager().registerEvents(customPlayerManager, this);
 
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
@@ -43,8 +43,6 @@ public final class MinecraftCivilizationsCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerClickListener(), this);
 
         PacketManager.init();
-
-
 
         dbConfigFile = new ConfigFile(this,
                 "db",
