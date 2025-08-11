@@ -19,11 +19,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class CustomPlayerManager implements Listener {
-    private final ConcurrentLinkedQueue<CustomPlayer> customPlayers = new ConcurrentLinkedQueue<>();
+    private final ConcurrentHashMap<UUID, CustomPlayer> customPlayers = new ConcurrentHashMap<>();
     @Getter
     @Setter
     private Consumer<Player> onPlayerJoin = player -> {
@@ -49,18 +50,12 @@ public class CustomPlayerManager implements Listener {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public CustomPlayer getCustomPlayer(UUID uuid) {
-        for (CustomPlayer player : customPlayers) {
-            if (player.getUuid().equals(uuid)) {
-                return player;
-            }
-        }
-        return null;
+        return customPlayers.get(uuid);
     }
 
     public void saveAll() {
-        for (CustomPlayer player : customPlayers) {
-            save(player.getUuid());
-        }
+       customPlayers.keys().asIterator().forEachRemaining(this::save);
+
     }
 
     public CustomPlayer load(String UUID) {
@@ -88,15 +83,15 @@ public class CustomPlayerManager implements Listener {
 
     public void addCustomPlayer(CustomPlayer player) {
         if (getCustomPlayer(player.getUuid()) != null) {
-            customPlayers.remove(getCustomPlayer(player.getUuid()));
+            customPlayers.remove(player.getUuid());
         }
-        customPlayers.add(player);
+        customPlayers.put(player.getUuid(), player);
     }
 
     public void removeCustomPlayer(UUID player) {
         if (getCustomPlayer(player) != null) {
             MinecraftCivilizationsCore.getInstance().getCustomPlayerManager().save(player);
-            customPlayers.remove(getCustomPlayer(player));
+            customPlayers.remove(player);
         }
     }
 
