@@ -16,7 +16,7 @@ import java.util.*;
 public class CustomPlayer {
     @Getter
     @Setter
-    private final UUID uuid;
+    private UUID uuid;
     @Getter
     @Setter
     private UUID currentGUI;
