@@ -186,21 +186,12 @@ public class CustomItem {
         String value = persistentDataContainerView.get(new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(), "abilities"), PersistentDataType.STRING);
         if (value == null) return null;
         Set<CustomAbility> customAbilities = new HashSet<>(0);
-        MinecraftCivilizationsCore.logger.info(String.valueOf(value));
         Set<NamespacedKey> namespacedKeys = new Gson().fromJson(value, new TypeToken<Set<NamespacedKey>>() {}.getType());
-        MinecraftCivilizationsCore.logger.info(String.valueOf(namespacedKeys));
         for (NamespacedKey namespacedKey : namespacedKeys) {
-            MinecraftCivilizationsCore.logger.info(String.valueOf(namespacedKey));
             customAbilities.add(CustomItemAbilityRegistry.getAbility(namespacedKey));
         }
         return customAbilities;
     }
-
-
-
-
-
-
 
     public void reloadItem() {
         if (!isCustomItem(item)) return;
@@ -209,15 +200,7 @@ public class CustomItem {
         item.editMeta(meta -> meta.lore(lore));
         Set<CustomAbility> customAbilities = getCustomAbilities();
         if (customAbilities == null) return;
-        for (CustomAbility customAbility : customAbilities) {
-            MinecraftCivilizationsCore.logger.info(String.valueOf(customAbility));
-            MinecraftCivilizationsCore.logger.info(customAbility.getCastEvent().name());
-        }
         abilities.clear();
         abilities.addAll(customAbilities);
-        for (CustomAbility customAbility : abilities) {
-            MinecraftCivilizationsCore.logger.info(String.valueOf(customAbility.getName()));
-            MinecraftCivilizationsCore.logger.info(customAbility.getCastEvent().name());
-        }
     }
 }
