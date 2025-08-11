@@ -27,15 +27,17 @@ public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
     @Setter
     private Consumer<Player> onPlayerJoin = player -> {
         T customPlayer = load(player.getUniqueId());
-        if (customPlayer == null) return;
-        addCustomPlayer((T) new CustomPlayer(player.getUniqueId()));
+        if (customPlayer == null) {
+            addCustomPlayer((T) new CustomPlayer(player.getUniqueId()));
+        }
     };
     @Getter
     @Setter
     private Consumer<AsyncPlayerPreLoginEvent> onPrePlayerJoin = player -> {
         T customPlayer = load(player.getUniqueId());
-        if (customPlayer == null) return;
-        addCustomPlayer((T) new CustomPlayer(player.getUniqueId()));
+        if (customPlayer == null) {
+            addCustomPlayer((T) new CustomPlayer(player.getUniqueId()));
+        }
     };
 
     @Setter
@@ -44,6 +46,17 @@ public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
     @Setter
     private Consumer<PlayerQuitEvent> onPlayerQuit = event -> {removeCustomPlayer(event.getPlayer().getUniqueId());};
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    // Constructor to initialize the customPlayerClass
+    @SuppressWarnings("unchecked")
+    public CustomPlayerManager() {
+        this.customPlayerClass = (Class<? extends T>) CustomPlayer.class;
+    }
+
+    // Constructor with explicit class type
+    public CustomPlayerManager(Class<? extends T> customPlayerClass) {
+        this.customPlayerClass = customPlayerClass;
+    }
 
     public T getCustomPlayer(UUID uuid) {
         for (T player : customPlayers) {
@@ -61,9 +74,17 @@ public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
     }
 
     public T load(String UUID) {
+        // Add null check for customPlayerClass
+        if (customPlayerClass == null) {
+            System.err.println("CustomPlayerManager: customPlayerClass is null. Cannot load player data.");
+            return null;
+        }
+        
         try (FileReader reader = new FileReader(MinecraftCivilizationsCore.getInstance().getDataFolder() + "/" + UUID + ".json")) {
             T customPlayer = gson.fromJson(reader, customPlayerClass);
-            addCustomPlayer(customPlayer);
+            if (customPlayer != null) {
+                addCustomPlayer(customPlayer);
+            }
             return customPlayer;
         } catch (IOException e) {
             return null;
@@ -79,6 +100,12 @@ public class CustomPlayerManager<T extends CustomPlayer> implements Listener {
     }
 
     public void save(UUID UUID) {
+        // Add null check for customPlayerClass
+        if (customPlayerClass == null) {
+            System.err.println("CustomPlayerManager: customPlayerClass is null. Cannot save player data.");
+            return;
+        }
+        
         try (FileWriter writer = new FileWriter(MinecraftCivilizationsCore.getInstance().getDataFolder() + "/" + UUID.toString() + ".json")) {
             String json = gson.toJson(MinecraftCivilizationsCore.getInstance().getCustomPlayerManager().getCustomPlayer(UUID), customPlayerClass);
             writer.write(json);
