@@ -19,7 +19,8 @@ public class GUIManager implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         List<GUI> relevantGUIs = new ArrayList<>(0);
         for (GUI gui : GUIs) {
-            if (gui.getInventory().equals(event.getClickedInventory())) {
+            // Add null check to prevent NullPointerException
+            if (gui.getInventory() != null && gui.getInventory().equals(event.getClickedInventory())) {
                 relevantGUIs.add(gui);
                 event.setCancelled(true);
             }
