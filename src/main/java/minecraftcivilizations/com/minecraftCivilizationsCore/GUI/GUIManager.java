@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Getter
 public class GUIManager implements Listener {
-    private final ArrayList<GUI> GUIs = new ArrayList<>();
+    private final ArrayList<GUI> GUIs = new ArrayList<>(0);
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {

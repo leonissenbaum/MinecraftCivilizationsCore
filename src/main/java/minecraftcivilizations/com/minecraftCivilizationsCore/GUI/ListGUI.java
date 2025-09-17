@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,23 @@ public class ListGUI extends GUI {
 
     public ListGUI(Component title, ArrayList<ItemStack> items) {
         super(title, 54, Map.of(GUIPlaceOption.SHOULD_PLACE_EXIT, true, GUIPlaceOption.SHOULD_PLACE_SEARCH, true));
+        show.addAll(items);
+        int itemCount = 0;
+        for (int placementIndex = 10; placementIndex < 44; placementIndex++) {
+            if (placementIndex % 9 != 0 && placementIndex % 9 != 8 && itemCount < items.size()) {
+                if(items.get(itemCount).getType().isItem() && items.get(itemCount).getType() != Material.AIR) {
+                    this.getItems().put(placementIndex, ItemUtils.makeItemGUIItem(items.get(itemCount), ItemUtils.getFriendlyName(items.get(itemCount).getType())));
+                }
+                itemCount++;
+            }
+        }
+        if (items.size() > getSize() - (18 + (getSize()/9 - 2) * 2)) {
+            this.getItems().put(getSize() - 1, new GUIItem(ItemUtils.makeGUIItemOfType(Material.ARROW, "Next").getItem(), () -> next((Player) getInventory().getViewers().getFirst())));
+        }
+    }
+
+    public ListGUI(Component title, ArrayList<ItemStack> items, Map<GUIPlaceOption, Boolean> options) {
+        super(title, 54, options);
         show.addAll(items);
         int itemCount = 0;
         for (int placementIndex = 10; placementIndex < 44; placementIndex++) {
@@ -50,6 +68,6 @@ public class ListGUI extends GUI {
 //            if (i > getSize() - (18 + (getSize()/9 - 2) * 2)) {
 //            }
         }
-        new ListGUI(Component.text("Search Results"), items).setParentGUI(this).open(player);
+        new ListGUI(Component.text("Search Results"), items, getOptions()).setParentGUI(this).open(player);
     }
 }

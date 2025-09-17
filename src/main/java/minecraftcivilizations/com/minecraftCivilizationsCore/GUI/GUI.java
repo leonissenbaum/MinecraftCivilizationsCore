@@ -93,8 +93,6 @@ public abstract class GUI {
     }
 
     private void placeOption(Map.Entry<GUIPlaceOption, Boolean> option) {
-        MinecraftCivilizationsCore.logger.info("Placing option: " + option.getKey());
-        MinecraftCivilizationsCore.logger.info("Parent GUI: " + this.parentGUI);
         if (option.getKey() == GUIPlaceOption.SHOULD_PLACE_BACK && option.getValue()) {
             if (this.parentGUI == null) return;
             GUIItem back = ItemUtils.makeGUIItemOfType(Material.ARROW, "Back");
@@ -116,22 +114,14 @@ public abstract class GUI {
             this.items.put(this.size - 5, exit);
         } else if (option.getKey() == GUIPlaceOption.SHOULD_PLACE_SEARCH && option.getValue()) {
             GUIItem search = ItemUtils.makeGUIItemOfType(Material.OAK_SIGN, "Search");
-            search.setOnClick(new Runnable() {
-                @Override
-                public void run() {
-                    MinecraftCivilizationsCore.getInstance().getCustomPlayerManager().getCustomPlayer((inventory.getViewers().getFirst()).getUniqueId()).setCurrentGUI(GUI.this.id);
-                    SearchSignGUI.openSearch((Player) inventory.getViewers().getFirst());
-                }
+            search.setOnClick(() -> {
+                MinecraftCivilizationsCore.getInstance().getCustomPlayerManager().getCustomPlayer((inventory.getViewers().getFirst()).getUniqueId()).setCurrentGUI(GUI.this.id);
+                SearchSignGUI.openSearch((Player) inventory.getViewers().getFirst());
             });
             this.items.put(4, search);
         } else if (option.getKey() == GUIPlaceOption.SHOULD_PLACE_NEXT && option.getValue()) {
             GUIItem next = ItemUtils.makeGUIItemOfType(Material.ARROW, "Next");
-            next.setOnClick(new Runnable() {
-                @Override
-                public void run() {
-                    childGUI.open((Player) inventory.getViewers().getFirst());
-                }
-            });
+            next.setOnClick(() -> childGUI.open((Player) inventory.getViewers().getFirst()));
             this.items.put(this.size - 1, next);
         }
     }
