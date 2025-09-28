@@ -54,7 +54,7 @@ public class CustomItem {
 //        addLore(List.of(lore));
 //    }
 
-    private static boolean isCustomItem(@NotNull ItemStack item) {
+    public static boolean isCustomItem(@NotNull ItemStack item) {
         PersistentDataContainerView persistentDataContainerView = item.getPersistentDataContainer();
         return persistentDataContainerView.has(new NamespacedKey(MinecraftCivilizationsCore.getInstance(), "customItem"));
     }
