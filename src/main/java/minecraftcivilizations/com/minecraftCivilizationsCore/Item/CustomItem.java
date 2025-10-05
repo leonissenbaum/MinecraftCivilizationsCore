@@ -1,7 +1,6 @@
 package minecraftcivilizations.com.minecraftCivilizationsCore.Item;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.AccessLevel;
@@ -18,7 +17,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -26,12 +24,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-
 @NoArgsConstructor
 public class CustomItem {
+
     @Getter
     @Setter
     private ItemStack item;
+
     @Getter
     private final Set<CustomAbility> abilities = new HashSet<>(0);
 
@@ -43,31 +42,21 @@ public class CustomItem {
         item.setItemMeta(meta);
     }
 
-//    public CustomItem(@NotNull NamespacedKey itemNamespacedKey, @NotNull NamespacedKey abilityNamespacedKey) {
-//        CustomItem customItem = CustomItemRegistry.getItem(itemNamespacedKey);
-//        CustomAbility customAbility = CustomItemAbilityRegistry.getAbility(abilityNamespacedKey);
-//        customItem.getAbilities().add(customAbility);
-//        ItemMeta meta = item.getItemMeta();
-//        meta.displayName(name);
-//        meta.addItemFlags(ItemFlag.values());
-//        item.setItemMeta(meta);
-//        addLore(List.of(lore));
-//    }
-
     public static boolean isCustomItem(@NotNull ItemStack item) {
-        PersistentDataContainerView persistentDataContainerView = item.getPersistentDataContainer();
-        return persistentDataContainerView.has(new NamespacedKey(MinecraftCivilizationsCore.getInstance(), "customItem"));
+        PersistentDataContainerView pdc = item.getPersistentDataContainer();
+        return pdc.has(new NamespacedKey(MinecraftCivilizationsCore.getInstance(), "customItem"));
     }
-
 
     private void initializeEditingOfPersistentDataContainer() {
         if (!isCustomItem(item)) {
-            item.editPersistentDataContainer(persistentDataContainer -> {
-                persistentDataContainer.set(new NamespacedKey(MinecraftCivilizationsCore.getInstance(), "customItem"), PersistentDataType.BOOLEAN, true);
-            });
+            item.editPersistentDataContainer(pdc ->
+                    pdc.set(new NamespacedKey(MinecraftCivilizationsCore.getInstance(), "customItem"),
+                            PersistentDataType.BOOLEAN, true)
+            );
         }
     }
 
+    // === FIXED: No more reloadItem() inside from() ===
     public static CustomItem from(@NotNull ItemStack item) {
         CustomItem customItem = new CustomItem();
         customItem.setItem(item);
@@ -75,7 +64,9 @@ public class CustomItem {
             customItem.initializeEditingOfPersistentDataContainer();
             return customItem;
         }
-        customItem.reloadItem();
+        Set<CustomAbility> customAbilities = customItem.getCustomAbilities();
+        customItem.abilities.clear();
+        if (customAbilities != null) customItem.abilities.addAll(customAbilities);
         return customItem;
     }
 
@@ -83,16 +74,15 @@ public class CustomItem {
         if (!isCustomItem(item)) {
             initializeEditingOfPersistentDataContainer();
         }
-        item.editPersistentDataContainer(persistentDataContainer -> {
-            Set<String> loreList = new HashSet<>(lore.size());
-            for (Component component : lore) {
-                loreList.add(ComponentUtils.serializeComponent(component));
-            }
-            persistentDataContainer.set(
-                    new NamespacedKey(plugin.getName().toLowerCase(), "lore"),
-                    PersistentDataType.STRING,
-                    new Gson().toJson(loreList, new TypeToken<List<String>>() {}.getType()));
-        });
+        List<String> loreList = new ArrayList<>(lore.size());
+        for (Component c : lore) {
+            loreList.add(ComponentUtils.serializeComponent(c));
+        }
+        item.editPersistentDataContainer(pdc -> pdc.set(
+                new NamespacedKey(plugin.getName().toLowerCase(), "lore"),
+                PersistentDataType.STRING,
+                new Gson().toJson(loreList, new TypeToken<List<String>>() {}.getType())
+        ));
         reloadItem();
     }
 
@@ -100,24 +90,20 @@ public class CustomItem {
         if (!isCustomItem(item)) {
             initializeEditingOfPersistentDataContainer();
         }
-
-        item.editPersistentDataContainer(persistentDataContainer -> {
-            Set<String> loreList = new HashSet<>(lore.size());
-            for (Component component : lore) {
-                loreList.add(ComponentUtils.serializeComponent(component));
-            }
-            List<Component> lore1 = getLoreFrom(plugin);
-            if (lore1 != null) {
-                for (Component component : lore1) {
-                    loreList.add(ComponentUtils.serializeComponent(component));
-                }
-            }
-
-            persistentDataContainer.set(
-                    new NamespacedKey(plugin.getName().toLowerCase(), "lore"),
-                    PersistentDataType.STRING,
-                    new Gson().toJson(loreList, new TypeToken<List<String>>() {}.getType()));
-        });
+        List<Component> existing = getLoreFrom(plugin);
+        List<String> merged = new ArrayList<>();
+        if (existing != null) {
+            for (Component c : existing) merged.add(ComponentUtils.serializeComponent(c));
+        }
+        for (Component c : lore) {
+            String s = ComponentUtils.serializeComponent(c);
+            if (!merged.contains(s)) merged.add(s);
+        }
+        item.editPersistentDataContainer(pdc -> pdc.set(
+                new NamespacedKey(plugin.getName().toLowerCase(), "lore"),
+                PersistentDataType.STRING,
+                new Gson().toJson(merged, new TypeToken<List<String>>() {}.getType())
+        ));
         reloadItem();
     }
 
@@ -130,33 +116,33 @@ public class CustomItem {
         MinecraftCivilizationsCore.logger.info("Adding ability to item from registry: " + ability.getName());
         abilities.add(ability);
 
-        PersistentDataContainerView persistentDataContainerView = item.getPersistentDataContainer();
-        String value = persistentDataContainerView.get(new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(), "abilities"), PersistentDataType.STRING);
-        Set<NamespacedKey> customAbilities = new  HashSet<>(0);
-        customAbilities = new Gson().fromJson(value, new TypeToken<Set<NamespacedKey>>() {}.getType());
-        if (customAbilities == null) {
-            customAbilities = new HashSet<>(0);
+        PersistentDataContainerView pdcView = item.getPersistentDataContainer();
+        String value = pdcView.get(new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(),
+                "abilities"), PersistentDataType.STRING);
+
+        Set<NamespacedKey> customAbilities = new HashSet<>();
+        if (value != null) {
+            customAbilities = new Gson().fromJson(value, new TypeToken<Set<NamespacedKey>>() {}.getType());
+            if (customAbilities == null) customAbilities = new HashSet<>();
         }
         customAbilities.add(customAbility);
 
         Set<NamespacedKey> finalCustomAbilities = customAbilities;
-        item.editPersistentDataContainer(persistentDataContainer -> {
-            persistentDataContainer.set(
-                    new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(), "abilities"),
-                    PersistentDataType.STRING,
-                    new Gson().toJson(finalCustomAbilities, new TypeToken<Set<NamespacedKey>>() {}.getType()));
-        });
+        item.editPersistentDataContainer(pdc -> pdc.set(
+                new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(), "abilities"),
+                PersistentDataType.STRING,
+                new Gson().toJson(finalCustomAbilities, new TypeToken<Set<NamespacedKey>>() {}.getType())
+        ));
         MinecraftCivilizationsCore.logger.info("Added ability to item persistent data: " + ability.getName());
     }
 
     public List<Component> getLore() {
         if (!isCustomItem(item)) return null;
-        PersistentDataContainerView persistentDataContainerView = item.getPersistentDataContainer();
-        List<Component> lore = new ArrayList<>(0);
-
-        for (NamespacedKey key : persistentDataContainerView.getKeys()) {
+        PersistentDataContainerView pdc = item.getPersistentDataContainer();
+        List<Component> lore = new ArrayList<>();
+        for (NamespacedKey key : pdc.getKeys()) {
             if (key.getKey().equals("lore")) {
-                String value = persistentDataContainerView.get(key, PersistentDataType.STRING);
+                String value = pdc.get(key, PersistentDataType.STRING);
                 List<String> loreList = new Gson().fromJson(value, new TypeToken<List<String>>() {}.getType());
                 if (loreList == null) return null;
                 for (String s : loreList) {
@@ -169,11 +155,11 @@ public class CustomItem {
 
     public List<Component> getLoreFrom(Plugin plugin) {
         if (!isCustomItem(item)) return null;
-        PersistentDataContainerView persistentDataContainerView = item.getPersistentDataContainer();
-        List<Component> lore = new ArrayList<>(0);
-        String lore1 = persistentDataContainerView.get(new NamespacedKey(plugin.getName().toLowerCase(), "lore"), PersistentDataType.STRING);
-        List<String> loreList = new Gson().fromJson(lore1, new TypeToken<List<String>>() {}.getType());
+        PersistentDataContainerView pdc = item.getPersistentDataContainer();
+        String loreStr = pdc.get(new NamespacedKey(plugin.getName().toLowerCase(), "lore"), PersistentDataType.STRING);
+        List<String> loreList = new Gson().fromJson(loreStr, new TypeToken<List<String>>() {}.getType());
         if (loreList == null) return null;
+        List<Component> lore = new ArrayList<>();
         for (String s : loreList) {
             lore.add(ComponentUtils.deserializeComponent(s));
         }
@@ -182,13 +168,14 @@ public class CustomItem {
 
     private Set<CustomAbility> getCustomAbilities() {
         if (!isCustomItem(item)) return null;
-        PersistentDataContainerView persistentDataContainerView = item.getPersistentDataContainer();
-        String value = persistentDataContainerView.get(new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(), "abilities"), PersistentDataType.STRING);
+        PersistentDataContainerView pdc = item.getPersistentDataContainer();
+        String value = pdc.get(new NamespacedKey(MinecraftCivilizationsCore.getInstance().getName().toLowerCase(),
+                "abilities"), PersistentDataType.STRING);
         if (value == null) return null;
-        Set<CustomAbility> customAbilities = new HashSet<>(0);
-        Set<NamespacedKey> namespacedKeys = new Gson().fromJson(value, new TypeToken<Set<NamespacedKey>>() {}.getType());
-        for (NamespacedKey namespacedKey : namespacedKeys) {
-            customAbilities.add(CustomItemAbilityRegistry.getAbility(namespacedKey));
+        Set<CustomAbility> customAbilities = new HashSet<>();
+        Set<NamespacedKey> keys = new Gson().fromJson(value, new TypeToken<Set<NamespacedKey>>() {}.getType());
+        for (NamespacedKey key : keys) {
+            customAbilities.add(CustomItemAbilityRegistry.getAbility(key));
         }
         return customAbilities;
     }
@@ -196,11 +183,16 @@ public class CustomItem {
     public void reloadItem() {
         if (!isCustomItem(item)) return;
         List<Component> lore = getLore();
-        if (lore == null) return;
-        item.editMeta(meta -> meta.lore(lore));
+        if (lore != null) {
+            ItemMeta meta = item.getItemMeta();
+            List<Component> current = meta.lore();
+            if (current == null || !current.equals(lore)) {
+                meta.lore(lore);
+                item.setItemMeta(meta);
+            }
+        }
         Set<CustomAbility> customAbilities = getCustomAbilities();
-        if (customAbilities == null) return;
         abilities.clear();
-        abilities.addAll(customAbilities);
+        if (customAbilities != null) abilities.addAll(customAbilities);
     }
 }
