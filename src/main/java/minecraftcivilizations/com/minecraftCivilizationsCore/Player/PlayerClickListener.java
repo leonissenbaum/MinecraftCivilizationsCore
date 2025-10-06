@@ -1,42 +1,53 @@
 package minecraftcivilizations.com.minecraftCivilizationsCore.Player;
 
-import io.papermc.paper.persistence.PersistentDataContainerView;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Ability.AbilityCastEvent;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Ability.CustomAbility;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Item.CustomItem;
-import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class PlayerClickListener implements Listener {
+
+    private final Map<UUID, Long> lastClickTick = new HashMap<>();
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Action action = event.getAction();
-
         ItemStack inHand = event.getPlayer().getInventory().getItemInMainHand();
-        if (!CustomItem.isCustomItem(inHand)) {
+
+        // Ignore air or non-custom items
+        if (inHand == null || inHand.getType().isAir() || !CustomItem.isCustomItem(inHand)) {
             return;
         }
 
+        UUID uuid = event.getPlayer().getUniqueId();
+        long currentTick = event.getPlayer().getWorld().getFullTime();
+        if (lastClickTick.getOrDefault(uuid, -1L) == currentTick) return; // prevent double fire
+        lastClickTick.put(uuid, currentTick);
+
         CustomItem from = CustomItem.from(inHand);
+
         for (CustomAbility ability : from.getAbilities()) {
-            if (action.isLeftClick() && ability.getCastEvent() == AbilityCastEvent.LEFT_CLICK) {
+            AbilityCastEvent cast = ability.getCastEvent();
+
+            if (action.isLeftClick() && !event.getPlayer().isSneaking() && cast == AbilityCastEvent.LEFT_CLICK)
                 ability.getAbilityFunction().accept(event.getPlayer());
-            } else if (action.isLeftClick() && event.getPlayer().isSneaking()
-                    && ability.getCastEvent() == AbilityCastEvent.SNEAK_LEFT_CLICK) {
+
+            else if (action.isLeftClick() && event.getPlayer().isSneaking() && cast == AbilityCastEvent.SNEAK_LEFT_CLICK)
                 ability.getAbilityFunction().accept(event.getPlayer());
-            } else if (action.isRightClick() && ability.getCastEvent() == AbilityCastEvent.RIGHT_CLICK) {
+
+            else if (action.isRightClick() && !event.getPlayer().isSneaking() && cast == AbilityCastEvent.RIGHT_CLICK)
                 ability.getAbilityFunction().accept(event.getPlayer());
-            } else if (action.isRightClick() && event.getPlayer().isSneaking()
-                    && ability.getCastEvent() == AbilityCastEvent.SNEAK_RIGHT_CLICK) {
+
+            else if (action.isRightClick() && event.getPlayer().isSneaking() && cast == AbilityCastEvent.SNEAK_RIGHT_CLICK)
                 ability.getAbilityFunction().accept(event.getPlayer());
-            }
         }
     }
-
 }
