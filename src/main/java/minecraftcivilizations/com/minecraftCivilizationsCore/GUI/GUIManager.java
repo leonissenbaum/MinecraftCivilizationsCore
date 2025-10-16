@@ -5,6 +5,7 @@ import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizati
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.ArrayList;
@@ -23,6 +24,11 @@ public class GUIManager implements Listener {
             if (gui.getInventory() != null && gui.getInventory().equals(event.getClickedInventory())) {
                 relevantGUIs.add(gui);
                 event.setCancelled(true);
+            }
+            if(event.getView().getTopInventory().equals(gui.getInventory())) {
+                if(event.getAction().equals(InventoryAction.MOVE_TO_OTHER_INVENTORY)){
+                    event.setCancelled(true);
+                }
             }
         }
         for (GUI gui : relevantGUIs) {
