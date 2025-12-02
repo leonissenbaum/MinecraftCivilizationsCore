@@ -20,9 +20,11 @@ public class ItemUtils {
     }
 
     public static GUIItem makeItemGUIItem(ItemStack item, String name) {
-        if(item == null || name == null || item.getItemMeta() == null) return null;
+        if(item == null || item.getItemMeta() == null) return null;
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text(name).color(TextColor.fromHexString("#ffffff")).decoration(TextDecoration.ITALIC, false));
+        if(name!=null){
+            meta.displayName(Component.text(name).color(TextColor.fromHexString("#ffffff")).decoration(TextDecoration.ITALIC, false));
+        }
         meta.addItemFlags(ItemFlag.values());
         meta.lore(new ArrayList<>());
         item.setItemMeta(meta);

@@ -3,6 +3,7 @@ package minecraftcivilizations.com.minecraftCivilizationsCore.GUI;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Options.GUIPlaceOption;
 import minecraftcivilizations.com.minecraftCivilizationsCore.Item.ItemUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -38,8 +39,15 @@ public class ListGUI extends GUI {
         int itemCount = 0;
         for (int placementIndex = 10; placementIndex < 44; placementIndex++) {
             if (placementIndex % 9 != 0 && placementIndex % 9 != 8 && itemCount < items.size()) {
-                if(items.get(itemCount).getType().isItem() && items.get(itemCount).getType() != Material.AIR) {
-                    this.getItems().put(placementIndex, ItemUtils.makeItemGUIItem(items.get(itemCount), ItemUtils.getFriendlyName(items.get(itemCount).getType())));
+                ItemStack item = items.get(itemCount);
+                if(item.getType().isItem() && item.getType() != Material.AIR) {
+                    String friendlyName = null;
+                    if(item.hasItemMeta() && item.getItemMeta().displayName()!=null) {
+                        friendlyName = PlainTextComponentSerializer.plainText().serialize(item.getItemMeta().displayName()); //converts the item's display name to a uniform style
+                    }else{
+                        friendlyName = ItemUtils.getFriendlyName(item.getType()); // If an item already has a name, pass it in as null. it will be handled.
+                    }
+                    this.getItems().put(placementIndex, ItemUtils.makeItemGUIItem(item, friendlyName));
                 }
                 itemCount++;
             }
