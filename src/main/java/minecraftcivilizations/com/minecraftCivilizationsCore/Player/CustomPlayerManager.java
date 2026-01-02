@@ -2,28 +2,29 @@ package minecraftcivilizations.com.minecraftCivilizationsCore.Player;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.Getter;
 import lombok.Setter;
 import minecraftcivilizations.com.minecraftCivilizationsCore.MinecraftCivilizationsCore;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.checkerframework.framework.qual.Unused;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class CustomPlayerManager implements Listener {
+    private static final NamespacedKey DATA_KEY = new NamespacedKey(MinecraftCivilizationsCore.getInstance(), "CustomPlayerData");
+
     private final ConcurrentHashMap<UUID, CustomPlayer> customPlayers = new ConcurrentHashMap<>();
     @Getter
     @Setter
@@ -46,7 +47,7 @@ public class CustomPlayerManager implements Listener {
     private Class<? extends CustomPlayer> customPlayerClass;
 
     @Setter
-    private Consumer<PlayerQuitEvent> onPlayerQuit = event -> {removeCustomPlayer(event.getPlayer().getUniqueId());};
+    private Consumer<PlayerQuitEvent> onPlayerQuit = event -> removeCustomPlayer(event.getPlayer().getUniqueId());
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public CustomPlayer getCustomPlayer(UUID uuid) {
@@ -55,30 +56,28 @@ public class CustomPlayerManager implements Listener {
 
     public void saveAll() {
        customPlayers.keys().asIterator().forEachRemaining(this::save);
-
     }
 
-    public CustomPlayer load(String UUID) {
-        try (FileReader reader = new FileReader(MinecraftCivilizationsCore.getInstance().getDataFolder() + "/" + UUID + ".json")) {
-            CustomPlayer customPlayer = gson.fromJson(reader, customPlayerClass);
-            addCustomPlayer(customPlayer);
-            return customPlayer;
-        } catch (IOException e) {
-            return null;
-        }
+    public CustomPlayer load(UUID uuid) {
+        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+        PersistentDataContainerView pdc = player.getPersistentDataContainer();
+
+        if (!pdc.has(DATA_KEY)) return null;
+        String data = pdc.get(DATA_KEY, PersistentDataType.STRING);
+
+        CustomPlayer customPlayer = gson.fromJson(data, customPlayerClass);
+        addCustomPlayer(customPlayer);
+        return customPlayer;
     }
 
-    public CustomPlayer load(UUID UUID) {
-        return load(UUID.toString());
-    }
+    public void save(UUID uuid) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) throw new IllegalArgumentException("Attempted to save player with UUID " + uuid + " who is not online");
 
-    public void save(UUID UUID) {
-        try (FileWriter writer = new FileWriter(MinecraftCivilizationsCore.getInstance().getDataFolder() + "/" + UUID.toString() + ".json")) {
-            String json = gson.toJson(MinecraftCivilizationsCore.getInstance().getCustomPlayerManager().getCustomPlayer(UUID), customPlayerClass);
-            writer.write(json);
-        } catch (IOException e) {
-            return;
-        }
+        String data = gson.toJson(getCustomPlayer(uuid), customPlayerClass);
+
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+        pdc.set(DATA_KEY, PersistentDataType.STRING, data);
     }
 
     public void addCustomPlayer(CustomPlayer player) {
