@@ -32,7 +32,6 @@ import static org.bukkit.Bukkit.getServer;
 public class PacketManager {
 
     public static ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-    private static Map<UUID, String> customNames = new HashMap<>();
 
     private static Object convertToComponent(String text) {
         try {
